@@ -1,14 +1,131 @@
-{
-  "posts": [
-    { "id": 1, "title": "Post 1" },
-    { "id": 2, "title": "Post 2" },
-    { "id": 3, "title": "Post 3" }
-  ],
-  "comments": [
-    { "id": 1, "body": "some comment", "postId": 1 },
-    { "id": 2, "body": "some comment", "postId": 1 }
-  ],
-  "profile": {
-    "name": "typicode"
-  }
-}
+---
+swagger: "2.0"
+info:
+  description: "No description"
+  version: "1.0.0"
+  title: "emergency"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /call: {}
+  /emergency/call:
+    post:
+      description: "Method allows cellular-network-info and geolocation information to be passed to PSAP\n"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          required:
+          - "cellular-network-info"
+          - "geolocation"
+          - "hash"
+          - "msisdn"
+          properties:
+            hash:
+              type: "string"
+              description: "a hash value created with a provided secret key"
+            imsi:
+              type: "string"
+              example: "286028630240118"
+            msisdn:
+              type: "string"
+              example: "905435022444"
+            cellular-network-info:
+              required:
+              - "access-info"
+              - "access-type"
+              - "cell-info-age"
+              type: "object"
+              properties:
+                access-type:
+                  type: "string"
+                  description: "access-type defined in TS 124229"
+                  example: "3GPP-E-UTRAN-FDD"
+                access-info:
+                  type: "string"
+                  description: "access-info defined in TS 124229"
+                  example: "28602c3010e4ce33"
+                cell-info-age:
+                  type: "string"
+                  example: "2018-11-09T14:27:43+03:00"
+            geolocation:
+              required:
+              - "deviceID"
+              - "latitude"
+              - "longitude"
+              - "timestamp"
+              type: "object"
+              properties:
+                deviceID:
+                  type: "string"
+                  example: "mac:1234567890ab"
+                timestamp:
+                  type: "string"
+                  example: "2010-11-04T20:57:29Z"
+                latitude:
+                  type: "string"
+                  example: "32.86726"
+                longitude:
+                  type: "string"
+                  example: "-97.16054"
+      responses:
+        201:
+          description: "HTTP-201 will be returned in case of a successful operation"
+          schema:
+            required:
+            - "returnCode"
+            - "returnMessage"
+            type: "object"
+            properties:
+              returnCode:
+                type: "string"
+                description: "A numerical code for the result of the request"
+                example: "0"
+              returnMessage:
+                type: "string"
+                description: "Details regarding the return code (may contain correlationId for tracking purposes)"
+                example: "Request <correlationId> processed successfully"
+        400:
+          description: "In case of invalid user requests, server will return HTTP-400 (syntax error); returnCode and returnMessage are OPTIONAL"
+          schema:
+            type: "object"
+            properties:
+              returnCode:
+                type: "string"
+                description: "A numerical code regarding the client related error"
+                example: "-2"
+              returnMessage:
+                type: "string"
+                description: "Details regarding the client related error"
+                example: "Missing parameter: msisdn"
+        401:
+          description: "If hash value is not provided correctly, this error may be returned. returnCode and returnMessage are OPTIONAL"
+          schema:
+            type: "object"
+            properties:
+              returnCode:
+                type: "string"
+              returnMessage:
+                type: "string"
+        500:
+          description: "In case of a problem in GMLC, HTTP-500 error with details will be returned"
+          schema:
+            required:
+            - "returnCode"
+            - "returnMessage"
+            type: "object"
+            properties:
+              returnCode:
+                type: "string"
+                description: "A numerical error code"
+                example: "-1"
+              returnMessage:
+                type: "string"
+                description: "Details regarding the return code"
+                example: "An error occured during processing of the request: can not reach ECP"
+      security: []
